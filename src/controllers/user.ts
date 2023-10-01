@@ -1,11 +1,13 @@
 import { RequestHandler } from "express";
 
-import { CreateUser } from "@/@types/user";
+import { CreateUser, VerifyEmailRequest } from "@/@types/user";
 import User from "@/models/user";
 
 import { generateToken } from "@/utils/helper";
 import { sendVerificationMail } from "@/utils/mail";
+import EmailVerification from "@/models/emailVerification";
 
+//Create New User
 export const create: RequestHandler = async (req: CreateUser, res) => {
   const { email, password, name } = req.body;
 
@@ -16,4 +18,28 @@ export const create: RequestHandler = async (req: CreateUser, res) => {
   sendVerificationMail(token, { name, email, userId: user._id.toString() });
 
   res.status(201).json({ user });
+};
+
+// Verify Email Address
+export const verifyEmail: RequestHandler = async (
+  req: VerifyEmailRequest,
+  res
+) => {
+  const { token, userId } = req.body;
+  const verificationToken = await EmailVerification.findOne({
+    owner: userId,
+  });
+
+  if (!verificationToken)
+    return res.status(403).json({ error: "Invalid token!" });
+
+  // Match Token in Database
+  const matched = await verificationToken.compareToken(token);
+
+  if (!matched) return res.status(403).json({ error: "Token not matched!" });
+
+  await User.findByIdAndUpdate(userId, { verified: true });
+  await EmailVerification.findByIdAndDelete(verificationToken._id);
+
+  res.json({ message: "Your email is verified!" });
 };
