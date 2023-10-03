@@ -10,5 +10,6 @@ const router = express.Router();
 
 router.post("/create", validate(CreateUserSchema), create);
 router.post("/verify-email", validate(EmailVerificationBody), verifyEmail);
+router.post("/re-verify-email", validate(EmailVerificationBody), verifyEmail);
 
 export default router;
