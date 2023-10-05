@@ -11,7 +11,9 @@ import { isValidObjectId } from "mongoose";
 import PasswordResetToken from "@/models/passwordResetToken";
 import { PASSWORD_RESET_LINK } from "@/utils/variables";
 
-//Create New User
+//@desc      Create New User
+//@Route     POST /auth/create
+//@access    Public
 export const create: RequestHandler = async (req: CreateUser, res) => {
   const { email, password, name } = req.body;
 
@@ -29,6 +31,10 @@ export const create: RequestHandler = async (req: CreateUser, res) => {
 };
 
 // Verify Email Address
+
+//@desc      Create New User
+//@Route     POST /auth/verify-email
+//@access    Public
 export const verifyEmail: RequestHandler = async (
   req: VerifyEmailRequest,
   res
@@ -52,6 +58,9 @@ export const verifyEmail: RequestHandler = async (
   res.json({ message: "Your email is verified!" });
 };
 
+//@desc      Create New User
+//@Route     POST /auth/re-verify-email
+//@access    Public
 export const sendReVerificationToken: RequestHandler = async (req, res) => {
   const { userId } = req.body;
 
@@ -81,6 +90,9 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
   res.json({ message: "Please check you mail." });
 };
 
+//@desc      Create New User
+//@Route     POST /auth/forget-password
+//@access    Public
 export const generateForwardPasswordLink: RequestHandler = async (req, res) => {
   const { email } = req.body;
 
@@ -102,6 +114,9 @@ export const generateForwardPasswordLink: RequestHandler = async (req, res) => {
   res.json({ message: "Check your email" });
 };
 
+//@desc      Create New User
+//@Route     POST /auth/verify-pass-reset-token
+//@access    Private
 export const isValidPasswordResetToken: RequestHandler = async (req, res) => {
   const { token, userId } = req.body;
   const resetToken = await PasswordResetToken.findOne({ owner: userId });
@@ -118,4 +133,11 @@ export const isValidPasswordResetToken: RequestHandler = async (req, res) => {
       .json({ error: "Unauthorized access, Invalid token" });
 
   res.json({ message: "Your token is valid." });
+};
+
+//@desc      Create New User
+//@Route     POST /auth/verify-pass-reset-token
+//@access    Private
+export const grantValid: RequestHandler = async (req, res) => {
+  res.json({ valid: true });
 };
