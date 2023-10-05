@@ -5,7 +5,11 @@ import { CreateUser, VerifyEmailRequest } from "@/@types/user";
 import User from "@/models/user";
 
 import { generateToken } from "@/utils/helper";
-import { sendForgotPasswordLink, sendVerificationMail } from "@/utils/mail";
+import {
+  sendForgotPasswordLink,
+  sendPassResetSuccessEmail,
+  sendVerificationMail,
+} from "@/utils/mail";
 import EmailVerification from "@/models/emailVerification";
 import { isValidObjectId } from "mongoose";
 import PasswordResetToken from "@/models/passwordResetToken";
@@ -32,7 +36,7 @@ export const create: RequestHandler = async (req: CreateUser, res) => {
 
 // Verify Email Address
 
-//@desc      Create New User
+//@desc      Verify Email Address
 //@Route     POST /auth/verify-email
 //@access    Public
 export const verifyEmail: RequestHandler = async (
@@ -58,7 +62,7 @@ export const verifyEmail: RequestHandler = async (
   res.json({ message: "Your email is verified!" });
 };
 
-//@desc      Create New User
+//@desc      Send Verification Tokens
 //@Route     POST /auth/re-verify-email
 //@access    Public
 export const sendReVerificationToken: RequestHandler = async (req, res) => {
@@ -90,7 +94,7 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
   res.json({ message: "Please check you mail." });
 };
 
-//@desc      Create New User
+//@desc      Generat Forgot Password Link
 //@Route     POST /auth/forget-password
 //@access    Public
 export const generateForwardPasswordLink: RequestHandler = async (req, res) => {
@@ -114,7 +118,7 @@ export const generateForwardPasswordLink: RequestHandler = async (req, res) => {
   res.json({ message: "Check your email" });
 };
 
-//@desc      Create New User
+//@desc      Verify Password Reset Token
 //@Route     POST /auth/verify-pass-reset-token
 //@access    Private
 export const isValidPasswordResetToken: RequestHandler = async (req, res) => {
@@ -135,9 +139,34 @@ export const isValidPasswordResetToken: RequestHandler = async (req, res) => {
   res.json({ message: "Your token is valid." });
 };
 
-//@desc      Create New User
+//@desc      Verify Password Reset Token
 //@Route     POST /auth/verify-pass-reset-token
 //@access    Private
 export const grantValid: RequestHandler = async (req, res) => {
   res.json({ valid: true });
+};
+
+//@desc      Update Password
+//@Route     POST /auth/update-password
+//@access    Private
+export const updatePassword: RequestHandler = async (req, res) => {
+  const { password, userId } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) return res.status(403).json({ error: "Unauthorized access!" });
+
+  const matched = await user.comparePassword(password);
+  if (matched)
+    return res
+      .status(422)
+      .json({ error: "The new password must be different!" });
+
+  user.password = password;
+  await user.save();
+
+  await PasswordResetToken.findOneAndDelete({ owner: user._id });
+  // send the success email
+
+  sendPassResetSuccessEmail(user.name, user.email);
+  res.json({ message: "Password resets successfully." });
 };
