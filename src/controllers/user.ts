@@ -77,3 +77,13 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
 
   res.json({ message: "Please check you mail." });
 };
+
+export const generateForwardPasswordLink: RequestHandler = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) return res.status(404).json({ error: "Account not found!" });
+
+  //Generate the Link
+};

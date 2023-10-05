@@ -1,5 +1,6 @@
 import {
   create,
+  generateForwardPasswordLink,
   sendReVerificationToken,
   verifyEmail,
 } from "@/controllers/user";
@@ -15,5 +16,6 @@ const router = express.Router();
 router.post("/create", validate(CreateUserSchema), create);
 router.post("/verify-email", validate(EmailVerificationBody), verifyEmail);
 router.post("/re-verify-email", sendReVerificationToken);
+router.post("/forget-password", generateForwardPasswordLink);
 
 export default router;
