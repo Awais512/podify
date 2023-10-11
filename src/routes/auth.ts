@@ -3,6 +3,7 @@ import {
   generateForwardPasswordLink,
   grantValid,
   sendReVerificationToken,
+  signIn,
   updatePassword,
   verifyEmail,
 } from "@/controllers/user";
@@ -10,6 +11,7 @@ import { isValidPasswordResetToken } from "@/middlewares/auth";
 import { validate } from "@/middlewares/validator";
 import {
   CreateUserSchema,
+  SignInValidationSchema,
   TokenAndIDValidation,
   UpdatePasswordSchema,
 } from "@/utils/validationSchema";
@@ -34,5 +36,7 @@ router.post(
   isValidPasswordResetToken,
   updatePassword
 );
+
+router.post("/sign-in", validate(SignInValidationSchema), signIn);
 
 export default router;
