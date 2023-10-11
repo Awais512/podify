@@ -34,8 +34,6 @@ export const create: RequestHandler = async (req: CreateUser, res) => {
   res.status(201).json({ user });
 };
 
-// Verify Email Address
-
 //@desc      Verify Email Address
 //@Route     POST /auth/verify-email
 //@access    Public
